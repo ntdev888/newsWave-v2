@@ -1,0 +1,23 @@
+# Django core framework
+Django==4.2.5  # Replace with your specific Django version
+
+# Django REST Framework for building APIs
+djangorestframework==3.14.0
+
+# Django CORS Headers to handle CORS issues
+django-cors-headers==4.0.0
+
+# News API Client for fetching news articles
+newsapi-python==0.2.6
+
+# Utility for handling JSON fields and parsing dates in Django
+pytz==2023.3  # For time zone handling, required by Django
+django-jsonfield-backport==1.0.4  # JSON fields if needed for compatibility
+
+# CSRF Exemption and other HTTP utilities
+requests==2.31.0  # Required for making HTTP requests
+
+# Additional dependencies
+gunicorn==20.1.0  # For deployment, replace if using a different server
+
+newsapi-python
