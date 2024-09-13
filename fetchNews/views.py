@@ -195,6 +195,8 @@ def get_articles(request):
 
         # Retrieve all articles of the given topic from the database
         articles = Article.objects.filter(topic=topic)
+        if len(articles) == 0:
+            articles = Article.objects.all()
 
         # If there are fewer than 8 articles, return all of them
         if len(articles) <= 8:
