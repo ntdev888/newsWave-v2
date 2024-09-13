@@ -3,8 +3,11 @@ from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from newsapi import NewsApiClient
 from .models import Article
+from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from .serializers import ArticleSerializer
 import random
 
 news_topics = [
@@ -111,12 +114,84 @@ def fetch_and_store_articles(request):
     else:
         return JsonResponse({"error": "POST request required."}, status=400)
 
+# def get_articles(request):
+#     print("Success")
+#     if request.method == "GET":
+#         # Get the topic from the request parameters
+#         topic = request.GET.get("topic", "")
+#         print(f"Topic:{topic}")
+
+#         # Retrieve all articles of the given topic from the database
+#         articles = Article.objects.filter(topic=topic)
+
+#         # If there are fewer than 8 articles, return all of them
+#         if len(articles) <= 8:
+#             random_articles = list(articles)
+#         else:
+#             # Randomly select 8 articles
+#             random_articles = random.sample(list(articles), 8)
+#             print(random_articles[1])
+
+#         # Convert the articles to a list of dictionaries to make them JSON serializable
+#         articles_data = [
+#             {   "id": article.id,
+#                 "title": article.title,
+#                 "url": article.url,
+#                 "description": article.description,
+#                 "published_at": article.published_at,
+#                 "source_name": article.source_name,
+#                 "pictureUrl": article.pictureUrl,
+#                 "topic": article.topic
+#             }
+#             for article in random_articles
+#         ]
+
+#         # Return the selected articles as JSON
+#         return JsonResponse(articles_data, safe=False)
+
+#     else:
+#         return JsonResponse({"error": "GET request required."}, status=400)
+    
+# def get_random_articles(request):
+#     if request.method == "GET":
+#         # Retrieve all articles from the database
+#         articles = Article.objects.all()
+
+#         # If there are fewer than 8 articles, return all of them
+#         if len(articles) <= 8:
+#             random_articles = list(articles)
+#         else:
+#             # Randomly select 8 articles
+#             random_articles = random.sample(list(articles), 8)
+
+#         # Convert the articles to a list of dictionaries to make them JSON serializable
+#         articles_data = [
+#             {
+#                 "title": article.title,
+#                 "url": article.url,
+#                 "description": article.description,
+#                 "published_at": article.published_at,
+#                 "source_name": article.source_name,
+#                 "pictureUrl": article.pictureUrl,
+#                 "topic": article.topic
+#             }
+#             for article in random_articles
+#         ]
+
+#         # Return the selected articles as JSON
+#         return JsonResponse(articles_data, safe=False)
+
+#     else:
+#         return JsonResponse({"error": "GET request required."}, status=400)
+
+
+@api_view(['GET'])
 def get_articles(request):
     print("Success")
     if request.method == "GET":
         # Get the topic from the request parameters
         topic = request.GET.get("topic", "")
-        print(f"Topic:{topic}")
+        print(f"Topic: {topic}")
 
         # Retrieve all articles of the given topic from the database
         articles = Article.objects.filter(topic=topic)
@@ -129,26 +204,17 @@ def get_articles(request):
             random_articles = random.sample(list(articles), 8)
             print(random_articles[1])
 
-        # Convert the articles to a list of dictionaries to make them JSON serializable
-        articles_data = [
-            {
-                "title": article.title,
-                "url": article.url,
-                "description": article.description,
-                "published_at": article.published_at,
-                "source_name": article.source_name,
-                "pictureUrl": article.pictureUrl,
-                "topic": article.topic
-            }
-            for article in random_articles
-        ]
+        # Use the serializer to convert the articles to JSON serializable data
+        serializer = ArticleSerializer(random_articles, many=True)
 
-        # Return the selected articles as JSON
-        return JsonResponse(articles_data, safe=False)
+        # Return the serialized articles as JSON
+        return Response(serializer.data)
 
     else:
         return JsonResponse({"error": "GET request required."}, status=400)
-    
+
+
+@api_view(['GET'])
 def get_random_articles(request):
     if request.method == "GET":
         # Retrieve all articles from the database
@@ -161,25 +227,17 @@ def get_random_articles(request):
             # Randomly select 8 articles
             random_articles = random.sample(list(articles), 8)
 
-        # Convert the articles to a list of dictionaries to make them JSON serializable
-        articles_data = [
-            {
-                "title": article.title,
-                "url": article.url,
-                "description": article.description,
-                "published_at": article.published_at,
-                "source_name": article.source_name,
-                "pictureUrl": article.pictureUrl,
-                "topic": article.topic
-            }
-            for article in random_articles
-        ]
+        # Use the serializer to convert the articles to JSON serializable data
+        serializer = ArticleSerializer(random_articles, many=True)
 
-        # Return the selected articles as JSON
-        return JsonResponse(articles_data, safe=False)
+        # Return the serialized articles as JSON
+        return Response(serializer.data)
 
     else:
         return JsonResponse({"error": "GET request required."}, status=400)
+
+
+
 
 # Endpoint testing
 def test_endpoint(request):
