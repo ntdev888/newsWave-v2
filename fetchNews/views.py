@@ -9,6 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from .serializers import ArticleSerializer
 import random
+import requests
+from newspaper import Article as NewsArticle
+import time
 
 news_topics = [
     "Politics",
@@ -114,77 +117,6 @@ def fetch_and_store_articles(request):
     else:
         return JsonResponse({"error": "POST request required."}, status=400)
 
-# def get_articles(request):
-#     print("Success")
-#     if request.method == "GET":
-#         # Get the topic from the request parameters
-#         topic = request.GET.get("topic", "")
-#         print(f"Topic:{topic}")
-
-#         # Retrieve all articles of the given topic from the database
-#         articles = Article.objects.filter(topic=topic)
-
-#         # If there are fewer than 8 articles, return all of them
-#         if len(articles) <= 8:
-#             random_articles = list(articles)
-#         else:
-#             # Randomly select 8 articles
-#             random_articles = random.sample(list(articles), 8)
-#             print(random_articles[1])
-
-#         # Convert the articles to a list of dictionaries to make them JSON serializable
-#         articles_data = [
-#             {   "id": article.id,
-#                 "title": article.title,
-#                 "url": article.url,
-#                 "description": article.description,
-#                 "published_at": article.published_at,
-#                 "source_name": article.source_name,
-#                 "pictureUrl": article.pictureUrl,
-#                 "topic": article.topic
-#             }
-#             for article in random_articles
-#         ]
-
-#         # Return the selected articles as JSON
-#         return JsonResponse(articles_data, safe=False)
-
-#     else:
-#         return JsonResponse({"error": "GET request required."}, status=400)
-    
-# def get_random_articles(request):
-#     if request.method == "GET":
-#         # Retrieve all articles from the database
-#         articles = Article.objects.all()
-
-#         # If there are fewer than 8 articles, return all of them
-#         if len(articles) <= 8:
-#             random_articles = list(articles)
-#         else:
-#             # Randomly select 8 articles
-#             random_articles = random.sample(list(articles), 8)
-
-#         # Convert the articles to a list of dictionaries to make them JSON serializable
-#         articles_data = [
-#             {
-#                 "title": article.title,
-#                 "url": article.url,
-#                 "description": article.description,
-#                 "published_at": article.published_at,
-#                 "source_name": article.source_name,
-#                 "pictureUrl": article.pictureUrl,
-#                 "topic": article.topic
-#             }
-#             for article in random_articles
-#         ]
-
-#         # Return the selected articles as JSON
-#         return JsonResponse(articles_data, safe=False)
-
-#     else:
-#         return JsonResponse({"error": "GET request required."}, status=400)
-
-
 @api_view(['GET'])
 def get_articles(request):
     print("Success")
@@ -238,8 +170,37 @@ def get_random_articles(request):
     else:
         return JsonResponse({"error": "GET request required."}, status=400)
 
+def populate_article_content(request):
+    # Fetch all articles with NULL content
+    articles = Article.objects.filter(content__isnull=True)
+    updated_articles = []
+    n = 1
 
+    for article in articles:
+        print(f"{n} out of {len(articles)}")
+        n += 1
+        try:
+            # Make an HTTP GET request to fetch the HTML content of the article
+            response = requests.get(article.url, timeout=2)
+            if response.status_code == 200:
+                # Use newspaper3k to parse the article content
+                news_article = NewsArticle(article.url)
+                news_article.download()
+                news_article.parse()
 
+                # Save the extracted content to the database
+                article.content = news_article.text
+                article.save()
+                updated_articles.append(article.id)  # Keep track of updated articles
+                
+
+        except Exception as e:
+            print(f"Error processing article ID {article.id}: {str(e)}")
+
+    return JsonResponse({
+        'status': 'success',
+        'updated_articles': updated_articles
+    })
 
 # Endpoint testing
 def test_endpoint(request):

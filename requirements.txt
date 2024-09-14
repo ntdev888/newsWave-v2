@@ -21,3 +21,7 @@ requests==2.31.0  # Required for making HTTP requests
 gunicorn==20.1.0  # For deployment, replace if using a different server
 
 newsapi-python
+
+requests
+
+newspaper3k

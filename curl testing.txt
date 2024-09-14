@@ -16,6 +16,8 @@ curl -X POST http://localhost:8000/api/users/login/ \
 curl -X POST -d "keyword=technology" http://localhost:8000/news/fetch-news/
 
 
+curl -X POST http://localhost:8000/news/fetch-news/
 
+curl -X POST http://localhost:8000/news/fetch-articles/
 
 curl -X POST -d "keyword=technology" https://7a1328cc-23d6-407a-a036-6c6763323478-00-254ncikmxe7ij.picard.replit.dev:8000/news/fetch-news/
