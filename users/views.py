@@ -6,15 +6,19 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework import status
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+
 
 # Registration View
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+
+
 
 # Login View
 class LoginView(APIView):
@@ -31,6 +35,7 @@ class LoginView(APIView):
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
     
 
+# Get user id
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_id(request):
@@ -53,6 +58,8 @@ class LogoutView(APIView):
         # Assuming TokenAuthentication is used
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
+    
+
 
 # User Settings Update
 class UpdateSettingsView(generics.UpdateAPIView):
@@ -61,6 +68,8 @@ class UpdateSettingsView(generics.UpdateAPIView):
     
     def get_object(self):
         return self.request.user.profile
+    
+
 
 # Update Topics View (could be combined with UpdateSettingsView)
 class UpdateTopicsView(generics.UpdateAPIView):
@@ -69,6 +78,8 @@ class UpdateTopicsView(generics.UpdateAPIView):
     
     def get_object(self):
         return self.request.user.profile
+    
+
 
 # User Detail View (optional, for fetching user info)
 class UserDetailView(generics.RetrieveAPIView):
@@ -77,3 +88,24 @@ class UserDetailView(generics.RetrieveAPIView):
     
     def get_object(self):
         return self.request.user
+    
+
+# update profile views
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
+
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# future for profile listing for family functionality
+class ProfileListView(generics.ListAPIView):
+
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAdminUser]

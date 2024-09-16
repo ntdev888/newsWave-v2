@@ -12,8 +12,25 @@ curl -X POST http://localhost:8000/api/users/login/ \
     -H "Content-Type: application/json" \
     -d '{"username": "johndoe", "password": "securepassword"}'
 
+    curl -X POST http://localhost:8000/api/users/api-token-auth/ \
+    -H "Content-Type: application/json" \
+    -d '{"username": "test", "password": "test"}'
+
 
 curl -X POST -d "keyword=technology" http://localhost:8000/news/fetch-news/
+
+curl -X PATCH http://localhost:8000/api/users/3/profile/ \
+-H "Content-Type: application/json" \
+-H "Authorization: d4abe6342ad48a74b1b9ace609c3bdecc59e93df \
+-d '{
+  "preferential_topics": ["bitcoin", "technology", "cars", "trains"],
+  "read_to_me": true,
+  "magnified_text": false
+}'
+
+
+curl -X PUT -H "Content-Type: application/json" -H "Authorization: Token d4abe6342ad48a74b1b9ace609c3bdecc59e93df" 
+-d '{"preferential_topics": ["bitcoin", "technology", "cars", "trains"], "read_to_me": true, "magnified_text": false}' http://localhost:8000/api/users/profile/
 
 
 curl -X POST http://localhost:8000/news/fetch-news/

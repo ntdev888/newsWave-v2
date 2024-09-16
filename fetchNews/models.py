@@ -1,5 +1,6 @@
 from django.db import models
 
+# Articles model
 class Article(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
